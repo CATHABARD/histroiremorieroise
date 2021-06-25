@@ -1,0 +1,23 @@
+  <mat-dialog-content [formGroup]="userDatasForm">
+    <mat-form-field class="full-width">
+      <input matInput placeholder="Nom" formControlName="nom">
+      <div class="row">
+        <mat-error class="error-message" *ngIf="(userDatasForm.controls.nom.hasError('minlength') || userDatasForm.controls.nom.hasError('maxlength')) && !userDatasForm.controls.nom.hasError('required')">{{getErrorMessage('nom')}}</mat-error>
+        <mat-error class="error-message" *ngIf="userDatasForm.controls.nom.hasError('required')">{{getErrorMessage('nom')}}</mat-error>
+      </div>
+    </mat-form-field><br/>
+    <mat-form-field class="full-width">
+      <input matInput placeholder="Prénom" formControlName="prenom">
+      <div class="row">
+        <mat-error class="error-message" *ngIf="(userDatasForm.controls.prenom.hasError('minlength') || userDatasForm.controls.prenom.hasError('maxlength')) && !userDatasForm.controls.prenom.hasError('required')">{{getErrorMessage('prenom')}}</mat-error>
+        <mat-error class="error-message" *ngIf="userDatasForm.controls.prenom.hasError('required')">{{getErrorMessage('prenom')}}</mat-error>
+      </div>
+   </mat-form-field><br/>
+   <mat-form-field class="full-width">
+      <input matInput placeholder="Email" formControlName="email">
+   </mat-form-field><br/>
+  </mat-dialog-content>
+  <mat-dialog-actions>
+    <button class="mat-raised-button mat-primary"(click)="save()">Ok</button>
+    <button class="mat-raised-button" (click)="close()">Annuler</button>
+  </mat-dialog-actions>

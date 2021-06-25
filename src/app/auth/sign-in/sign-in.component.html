@@ -1,0 +1,26 @@
+<h2 mat-dialog-title>Connexion</h2>  
+    <mat-dialog-content [formGroup]="signinForm">
+      <mat-form-field class="full-width">
+        <input matInput placeholder="Email" formControlName="email">
+      <div class="row">
+        <mat-error class="error-message" *ngIf="signinForm!.get('email')!.hasError('email')">{{getErrorMessage('email')}}</mat-error>
+        <mat-error class="error-message" *ngIf="signinForm!.get('email')!.hasError('required')">{{getErrorMessage('email')}}</mat-error>
+      </div>
+    </mat-form-field>
+    <mat-form-field class="full-width">
+      <input matInput placeholder="Mot de passe" formControlName="password" [type]="hide ? 'password' : 'text'">
+      <button mat-icon-button matSuffix (click)="onChangeVisibilite()" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
+        <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+      </button>
+      <div class="row">
+        <mat-error class="error-message" *ngIf="signinForm!.get('password')!.hasError('required')">{{getErrorMessage('password')}}</mat-error>
+        <mat-error class="error-message" *ngIf="signinForm!.get('password')!.hasError('minlength')">{{getErrorMessage('password')}}</mat-error>
+        <mat-error class="error-message" *ngIf="signinForm!.get('password')!.hasError('maxlength')">{{getErrorMessage('password')}}</mat-error>
+      </div>
+    </mat-form-field>
+  </mat-dialog-content>
+  <mat-dialog-actions>
+    <button class="mat-raised-button mat-accent"(click)="save()">Ok</button>
+    <button class="mat-raised-button"(click)="close()">Annuler</button>
+    <button class="mat-raised-button"(click)="onMotDePasseOublie()">Mot de passe oublié ?</button>
+  </mat-dialog-actions>

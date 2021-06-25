@@ -1,4 +1,7 @@
 import { Component } from '@angular/core';
+import { User } from './modeles/user';
+import { AuthService } from './services/auth.service';
+import { GlobalService } from './services/global.service';
 
 @Component({
   selector: 'app-root',
@@ -7,4 +10,11 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'HistoireDeMorieres';
+  
+  constructor(private globalService: GlobalService,
+    private authService: AuthService) {
+    this.authService.signInVisiteur().then(u => {
+      this.globalService.initData();
+    });
+  }
 }

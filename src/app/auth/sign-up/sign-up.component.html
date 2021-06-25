@@ -1,0 +1,46 @@
+  <mat-dialog-content [formGroup]="signupForm">
+      <mat-form-field class="full-width">
+        <input matInput placeholder="Nom" formControlName="nom">
+        <div class="row">
+          <mat-error class="error-message" *ngIf="(signupForm.controls.nom.hasError('minlength') || signupForm.controls.nom.hasError('maxlength')) && !signupForm.controls.nom.hasError('required')">{{getErrorMessage('nom')}}</mat-error>
+          <mat-error class="error-message" *ngIf="signupForm.controls.nom.hasError('required')">{{getErrorMessage('nom')}}</mat-error>
+        </div>
+      </mat-form-field><br/>
+      <mat-form-field class="full-width">
+        <input matInput placeholder="Prénom" formControlName="prenom">
+        <div class="row">
+          <mat-error class="error-message" *ngIf="(signupForm.controls.prenom.hasError('minlength') || signupForm.controls.prenom.hasError('maxlength')) && !signupForm.controls.prenom.hasError('required')">{{getErrorMessage('prenom')}}</mat-error>
+          <mat-error class="error-message" *ngIf="signupForm.controls.prenom.hasError('required')">{{getErrorMessage('prenom')}}</mat-error>
+        </div>
+      </mat-form-field><br/>
+      <mat-form-field class="full-width">
+        <input matInput placeholder="Email" formControlName="email">
+        <div class="row">
+          <mat-error class="error-message" *ngIf="signupForm.controls.email.hasError('email') && !signupForm.controls.email.hasError('required')">{{getErrorMessage('email')}}</mat-error>
+          <mat-error class="error-message" *ngIf="signupForm.controls.email.hasError('required')">{{getErrorMessage('email')}}</mat-error>
+        </div>
+      </mat-form-field><br/>
+      <mat-form-field class="full-width">
+          <input matInput placeholder="Mot de passe" formControlName="password1" autocomplete="current-password" [type]="hide ? 'password' : 'text'">
+        <button mat-icon-button matSuffix (click)="onChangeVisibilite()" [attr.aria-label]="'Hide password1'" [attr.aria-pressed]="hide">
+          <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+        </button>
+        <div class="row">
+          <mat-error class="error-message" *ngIf="signupForm.controls.password1.hasError('minLength') && !signupForm.controls.password1.hasError('required')">{{getErrorMessage('password1')}}</mat-error>
+          <mat-error class="error-message" *ngIf="signupForm.controls.password1.hasError('required')">{{getErrorMessage('password1')}}</mat-error>
+        </div>
+      </mat-form-field><br/>
+      <mat-form-field class="full-width">
+        <input matInput placeholder="Confirmer le mot de passe" formControlName="password2" autocomplete="current-password" [type]="hide ? 'password' : 'text'">
+      <button mat-icon-button matSuffix (click)="onChangeVisibilite()" [attr.aria-label]="'Hide password2'" [attr.aria-pressed]="hide">
+        <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+      </button>
+      <div class="row">
+        <mat-error class="error-message" *ngIf="signupForm.controls.password2.hasError('minLength') && !signupForm.controls.password2.hasError('required')">{{getErrorMessage('password2')}}</mat-error>
+        <mat-error class="error-message" *ngIf="signupForm.controls.password2.hasError('required')">{{getErrorMessage('password2')}}</mat-error>
+      </div>
+     </mat-form-field>
+    <mat-dialog-actions>
+      <button mat-button [disabled]="signupForm.invalid" mat-dialog-close="true" (click)="onSave  ()">Ok</button>
+      <button mat-button mat-dialog-close cdkFocusInitial>Annuler</button>
+    </mat-dialog-actions>
