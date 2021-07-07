@@ -1,0 +1,45 @@
+pre {
+    display: flex;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    font-family: monospace;
+    overflow-x: auto ;
+    padding-bottom: 12px;
+    box-sizing: border-box;
+    white-space : pre-wrap; }
+
+  .card {
+    vertical-align: 0px;
+    margin-top: 10pt;
+    margin-bottom: 10pt;
+  }
+  
+  mat-card {
+    vertical-align: top;
+    margin-left: 10px;
+    margin-top: 10px;
+  }
+  
+  .img {
+    margin: 5px;
+  }
+
+  .header-image {
+    background-size: cover;
+  }
+
+  mat-grid-tile {
+    vertical-align: 0px;
+    align-content: center;
+  }
+
+  .mat-form-field {
+    margin-right: 12px;
+  }
+
+  button {
+    background-color: rgb(40,40,50);
+    font-size: large;
+    border: 0px;
+    margin: 20px;
+  }

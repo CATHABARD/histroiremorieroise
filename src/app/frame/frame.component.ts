@@ -1,26 +1,31 @@
 import { BreakpointObserver, Breakpoints, BreakpointState } from '@angular/cdk/layout';
-import { Component, OnInit } from '@angular/core';
+import { ANALYZE_FOR_ENTRY_COMPONENTS, Component, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { Observable, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, Observer, Subscriber, Subscription } from 'rxjs';
+import { map, take } from 'rxjs/operators';
 import { SignInComponent } from '../auth/sign-in/sign-in.component';
 import { SignUpComponent } from '../auth/sign-up/sign-up.component';
 import { Article } from '../modeles/article';
+import { User } from '../modeles/user';
 import { AuthService } from '../services/auth.service';
-import { GlobalService } from '../services/global.service';
+import { GlobalService, Status } from '../services/global.service';
+import * as firebase from 'firebase/app';
+import "firebase/auth";
+import { Theme } from '../modeles/themes';
 
 @Component({
   selector: 'app-frame',
   templateUrl: './frame.component.html',
   styleUrls: ['./frame.component.css']
 })
-export class FrameComponent implements OnInit {
+export class FrameComponent implements OnDestroy {
   dialogResultSuscription: Subscription | undefined;
 
-  userMail: string = '';
+  userMail: string = 'Visiteur';
   userPassword: string = '';
   isAdmin = false;
+  isAuth = false;
   showFiller = false;
   isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Small)
   .pipe(
@@ -31,9 +36,25 @@ export class FrameComponent implements OnInit {
               public dialog: MatDialog,
               private breakpointObserver: BreakpointObserver,
               public globalService: GlobalService,
-              private authService: AuthService) { }
+              public authService: AuthService) {
+                firebase.default.auth().onAuthStateChanged(u => {
+                  if (u != null) {
+                    if( u.email != authService.getVisiteur()) {
+                      this.userMail = u?.email!;
+                      this.isAuth = true;
+                    } else {
+                      this.userMail = 'visiteur';
+                      this.isAuth = false;
+                    }
+                  } else {
+                    this.userMail = 'visiteur';
+                    this.isAuth = false;
+                  }
+                })
+              }
 
-  ngOnInit(): void {
+  ngOnDestroy() {
+
   }
 
   onGoAccueil() {
@@ -49,15 +70,21 @@ export class FrameComponent implements OnInit {
   }
 
   onOpenPdf() {
+    this.router.navigate(['app-liste-pdf']);
+  }
 
+  onListeArticles(t: Theme) {
+    this.router.navigate(['app-liste-articles']);
   }
 
   onEditAlbum(deb: number, fin: number) {
-    
-  }
+    this.router.navigate(['app-album/'], {
+      queryParams: {debut: deb, fin: fin}
+    });
+}
 
   onEditArticle(a: Article) {
-
+    
   }
 
   onNewCompteDialog() {
@@ -68,10 +95,23 @@ export class FrameComponent implements OnInit {
 
     const dialogRef = this.dialog.open(SignUpComponent);
 
+    if (this.dialogResultSuscription) {
+      this.dialogResultSuscription.unsubscribe();
+    }
+
+    this.dialogResultSuscription =  dialogRef.afterClosed().subscribe(data => {
+      if (data !== undefined) {
+        const user = new User('', '', data.nom, data.prenom, data.email, false, Status.initial);
+        this.authService.createNewUser(user, data.password1);
+      }
+    },
+    (error) => {
+      console.log(error);
+    });
   }
 
   onConnectWidthGoogleDialog() {
-    this.authService.connectWidthGoogle();
+    this.authService.connectWidthGoogle().pipe(take(1));
   }
 
   onConnectDialog() {
@@ -89,7 +129,9 @@ export class FrameComponent implements OnInit {
 
     this.dialogResultSuscription =  dialogRef.afterClosed().subscribe(data => {
       if (data !== undefined && data.email !== undefined && data.password !== undefined ) {
-        this.authService.signInUser(data.email, data.password);
+        this.authService.signInUser(data.email, data.password).finally(() => {
+          this.globalService.initData();
+        });
       }
     },
     (error) => {
@@ -98,7 +140,8 @@ export class FrameComponent implements OnInit {
   }
 
   onDisconnectDialog() {
-      this.authService.signInUser('claude.cathabard@gmail.com', 'MyPepita51').then(() => {
+    this.authService.signInVisiteur().finally(() => {
+      this.globalService.initData();
       this.router.navigate(['app-home']);
     });
   }

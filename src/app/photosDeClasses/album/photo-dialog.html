@@ -1,0 +1,17 @@
+<mat-card class="card">
+    <mat-card-header>
+        <mat-card-title>{{titre}}</mat-card-title>
+        <mat-card-subtitle>{{sousTitre}}</mat-card-subtitle>
+    </mat-card-header>
+    <img mat-card-image dialog-img src="{{image}}" alt="Photo de classe" class="dialog-img">   
+    <mat-card-content>
+        <pre>
+            {{listeEleves}}
+        </pre>
+    </mat-card-content>
+    <mat-card-actions>
+        <div>
+            <button mat-button-accent mat-dialog-close>Fermer</button>
+        </div>
+    </mat-card-actions>
+</mat-card>

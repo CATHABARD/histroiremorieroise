@@ -7,6 +7,7 @@ export const environment = {
   firebaseConfig: {
     apiKey: "AIzaSyCGrMW1D012VguRDwujOXsefh-58NoZ4SY",
     authDomain: "histoiredemorieres.firebaseapp.com",
+    databaseURL: "https://histoiredemorieres-default-rtdb.europe-west1.firebasedatabase.app",
     projectId: "histoiredemorieres",
     storageBucket: "histoiredemorieres.appspot.com",
     messagingSenderId: "1009663324985",

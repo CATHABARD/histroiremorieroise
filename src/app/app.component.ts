@@ -13,8 +13,8 @@ export class AppComponent {
   
   constructor(private globalService: GlobalService,
     private authService: AuthService) {
-    this.authService.signInVisiteur().then(u => {
-      this.globalService.initData();
+    this.authService.signInVisiteur().then((user) => {
+        // console.log(user);
     });
   }
 }

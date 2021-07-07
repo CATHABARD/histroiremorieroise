@@ -16,10 +16,10 @@ export class UnvalidateUserMessageComponent implements OnInit {
 
   onDemandeMail() {
     this.authService.sendMailNewUser();
-    this.router.navigate(['app-sign-in']);
+    this.router.navigate(['app-accueil']);
   }
 
   onAnnuler() {
-    this.router.navigate(['app-home']);
+    this.router.navigate(['app-accueil']);
   }
 }

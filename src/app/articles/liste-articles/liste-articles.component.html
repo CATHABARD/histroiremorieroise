@@ -1,0 +1,22 @@
+<h5>Articles sur le thème : [{{globalService.currentTheme?.nom}}]</h5>
+
+<button mat-flat-button *ngIf="userIsConnected == true" color='accent' (click)="onAddArticle()">
+  Ajouter un article sur ce thème.
+</button>
+<div *ngIf="globalService.currentTheme">
+  <div *ngFor="let a of globalService.currentTheme.articles">
+    <mat-card class="card-item">
+      <mat-card-title>{{a.titre}} (par : {{a.nomAuteur}}) (Cliquez sur la photo pour l'agrandir.)</mat-card-title>
+      <mat-card-subtitle >{{a.legende}}</mat-card-subtitle>
+          <img src={{a.photo}} alt="Photo de Morières introuvable" height="250px" style="margin: 25px;" (click)="onZoom(a)"> 
+          <img src={{a.photo2}} alt="Photo de Morières introuvable" style="margin: 25px;" *ngIf="a.photo2" height="250px" (click)="onZoom(a)"> 
+      <div>
+        <pre>{{ a.texte }}</pre>
+      </div>
+      <div class="button-row">
+        <button mat-flat-button *ngIf="canWrite" color="primary" (click)="onEdit(a)">Modifier l'article</button>
+      </div>
+    </mat-card>
+  </div> 
+</div>
+                    

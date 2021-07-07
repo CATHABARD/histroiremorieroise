@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "histoiredemorieres"
+    "default": "histoiredemorieres",
+    "histoireDeMorieres": "histoiredemorieres"
   }
 }

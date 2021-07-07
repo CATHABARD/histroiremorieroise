@@ -1,17 +1,31 @@
-.container {
-    width: 500px;
-    height: 300px;
-    border: 1px solid rgba(0, 0, 0, 0.5);
-  }
-  
-  .sidenav-content {
-    display: flex;
-    height: 100%;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .sidenav {
-    padding: 20px;
-  }
-  
+.sidenav-container {
+  height: 100%;
+}
+
+.sidenav {
+  width: 260px;
+}
+
+.sidenav .mat-toolbar {
+  background: inherit;
+}
+
+.mat-toolbar.mat-primary {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.button-row button,
+.button-row a {
+  margin-right: 12px;
+}
+
+.menu-spacer {
+  flex: 1 1 auto;
+}
+
+.titre {
+  margin-left: 10px;
+  margin-right: 10px;
+}

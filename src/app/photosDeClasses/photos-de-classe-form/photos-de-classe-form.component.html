@@ -1,0 +1,42 @@
+<form [formGroup]="addPhotoForm" (ngSubmit)="onSubmit()">
+  <div *ngIf="photo?.photo != undefined && photo?.photo ==''">
+    <mat-form-field class="full-width" appearance="outline">
+      <ngx-mat-file-input formControlName="photo" placeholder="Photo" formControlName="photo" (change)="detectFiles($event)"></ngx-mat-file-input>
+      <mat-icon matSuffix>folder</mat-icon>
+      <mat-error *ngIf="addPhotoForm.controls.photo.hasError('required')">
+        Merci de sélectionner un fichier.
+      </mat-error>
+      <mat-error *ngIf="addPhotoForm.controls.photo.hasError('maxSize')">{{getErrorMessage('photo')}}</mat-error>
+    </mat-form-field>
+    <div class="row">
+      <mat-progress-bar mode="indeterminate" *ngIf="fileIsUploading"></mat-progress-bar>
+    </div>
+  </div>
+  <div *ngIf="photo?.photo ==''">
+    <img *ngIf="photo?.photo != undefined" class='img' src={{photo?.photo}}>
+  </div>
+  <div *ngIf="fileUploaded">
+    <mat-form-field class="full-width">
+      <input matInput type="number" placeholder="Année" formControlName="annee">
+      <div class="row">
+        <mat-error class="error-message" *ngIf="addPhotoForm.controls.annee.hasError('required')">{{getErrorMessage('annee')}}</mat-error>
+      </div>
+    </mat-form-field>
+    <mat-form-field class="full-width">
+      <input matInput placeholder="Titre" formControlName="titre">
+      <div class="row">
+        <mat-error class="error-message" *ngIf="addPhotoForm.controls.titre.hasError('required')">{{getErrorMessage('titre')}}</mat-error>
+      </div>
+    </mat-form-field>
+    <br/>
+    <mat-form-field class="full-width">
+      <textarea matInput maxRows="10" cols="300" placeholder="Liste des élèves" formControlName="listeEleves"></textarea>
+      <div class="row">
+        <mat-error class="error-message" *ngIf="addPhotoForm.controls.listeEleves.hasError('required')">{{getErrorMessage('listeEleves')}}</mat-error>
+      </div>
+    </mat-form-field>
+  </div>
+  <div class="button-wrapper">
+    <button mat-flat-button [disabled]="addPhotoForm.invalid" color="primary">Valider</button>
+  </div>
+</form>

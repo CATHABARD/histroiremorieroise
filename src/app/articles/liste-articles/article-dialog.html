@@ -1,0 +1,18 @@
+<mat-card class="card">
+    <mat-card-header>
+        <mat-card-title>{{titre}}</mat-card-title>
+        <mat-card-subtitle>{{sousTitre}}</mat-card-subtitle>
+    </mat-card-header>
+    <img mat-card-image dialog-img src={{image}} alt="Article" class="dialog-img">   
+    <img mat-card-image dialog-img src={{image2}} alt="Article" class="dialog-img" *ngIf="image2">   
+    <mat-card-content>
+        <pre>
+            {{texte}}
+        </pre>
+    </mat-card-content>
+    <mat-card-actions>
+        <div>
+            <button mat-button-accent mat-dialog-close>Fermer</button>
+        </div>
+    </mat-card-actions>
+</mat-card>

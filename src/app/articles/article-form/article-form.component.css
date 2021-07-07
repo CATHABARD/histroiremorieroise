@@ -1,0 +1,46 @@
+  .full-width {
+    width: 100%;
+  }
+
+  .error-message {
+    font-size: small;
+    color: red;
+    margin-top: 10px;
+    margin-left: 10px;
+  }
+
+  .example-container {
+    display: flex;
+    flex-direction: column;
+  }
+ 
+  .example-right-align {
+    text-align: right;
+  }
+  
+  input.example-right-align::-webkit-outer-spin-button,
+  input.example-right-align::-webkit-inner-spin-button {
+    display: none;
+  }
+  
+  input.example-right-align {
+    -moz-appearance: textfield;
+  }
+
+  .img {
+    max-width: 20%;
+    max-height: 15%;
+    align-content: left;
+  }
+
+  .photo-input {
+    border: thin;
+    border-color: white;
+    width: 10%;
+    background-color: white;
+    color: black;
+  }
+
+  .file-input {
+    color: black;
+  }

@@ -1,37 +1,42 @@
-import { Injectable, NgZone, OnDestroy, ɵConsole } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import auth from 'firebase/app';
 import { Router } from '@angular/router';
 import { User } from '../modeles/user';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { Observable, Subject } from 'rxjs';
-import { AngularFireAuth } from '@angular/fire/auth';
-import { Droits } from './global.service';
+import { MatDialog } from '@angular/material/dialog';
+import { from, Observable, Subject } from 'rxjs';
+import { Droits, GlobalService } from './global.service';
+import * as firebase from 'firebase/app';
+import "firebase/auth";
+import "firebase/firestore";
+import { AngularFirestore } from '@angular/fire/firestore';
 import { UsersServicesService } from './users-services.service';
-import { AngularFirestore, DocumentChangeAction } from '@angular/fire/firestore';
-import { UserDatasComponent } from '../auth/user-datas/user-datas.component';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private visiteur = {email: 'claude.cathabard@gmail.com',
-                      password: 'HDM2021'};
+  private readonly visiteur = {email: 'claude.cathabard@gmail.com',
+                      password: 'HDM2021'}
 
   userId: string = '';
   private currentFirebaseUser: firebase.default.auth.UserCredential | undefined;
   private currentUser: User | undefined | null;
-  user$: Observable<auth.User | null>;
-  authSubject = new Subject<boolean>();
 
   constructor(public dialog: MatDialog,
               public router: Router,
-              private afAuth: AngularFireAuth,
-              private afStore: AngularFirestore,
               public ngZone: NgZone,
-              private usersServices: UsersServicesService
-          ) {
-            this.user$ = this.afAuth.authState;
-          }
+              private afs: AngularFirestore,
+              private usersService: UsersServicesService) {
+                firebase.default.auth().onAuthStateChanged(u => {
+                  if(u == null) {
+                    this.currentFirebaseUser = undefined;
+                  }
+            });
+  }
+
+  getVisiteur() {
+    return this.visiteur.email;
+  }
 
   getCurrentFirebaseUser() {
     return this.currentFirebaseUser;
@@ -42,124 +47,129 @@ export class AuthService {
   }      
       
   signInVisiteur() {
-  return new Promise(
-    (resolve) => {
-      resolve(this.afAuth.signInWithEmailAndPassword(this.visiteur.email, this.visiteur.password).then((u) => {
-        this.currentFirebaseUser = u;
-      }).catch(error => {
-        console.log(error);
-      }));
-    });
+    return new Promise((resolve, reject) => {
+      // Ferme la connexion en cours
+      this.SignOut().then(() => {
+        // Ouvrir la connexion visiteur
+        firebase.default.auth().signInWithEmailAndPassword(this.visiteur.email, this.visiteur.password).then(u => {
+          this.currentUser = null;
+          this.currentFirebaseUser = u;
+        }).catch(error => {
+          console.log(error);
+          reject(error);
+        }).finally(() => {
+          resolve(this.currentUser);
+        })
+      });
+    })
   }
 
   createNewUser(user: User, password: string) {
   return new Promise(
     (resolve) => {
-      this.afAuth.createUserWithEmailAndPassword(user!.email!.trim(), password.trim()).then((u: firebase.default.auth.UserCredential) => {
+      firebase.default.auth().createUserWithEmailAndPassword(user!.email!.trim(), password.trim()).then((u: firebase.default.auth.UserCredential) => {
           u.user!.updateProfile({displayName: user.nom + '/' + user.prenom});
-          u.user!.sendEmailVerification().then(result => {
-              user.uid = u.user!.uid;
-            }).catch((error: any) => {
+          user.uid = u.user!.uid;
+          u.user!.sendEmailVerification().then(() => {
+            alert('Un email vous a été envoyé, merci de cliquer sur le lien qu\'il contien afin de valider vôtre inscription.');
+          }).catch((error: any) => {
               console.log(error);
             });
-          this.afAuth.signInWithEmailAndPassword(this.visiteur.email, this.visiteur.password).then(u => {
-            this.currentFirebaseUser = u;
-          });
-          this.router.navigate(['app-accueil']);
-          resolve(true);
-        }
-      );
-    }
-  );
-}
+            firebase.default.auth().signInWithEmailAndPassword(this.visiteur.email, this.visiteur.password).then(u => {
+              this.currentFirebaseUser = u;
+            });
+            this.router.navigate(['app-accueil']);
+            resolve(true);
+          }
+        );
+      }
+    );
+  }
 
   updateCurrentUser(u: User) {
-    this.afAuth.currentUser.then(U => U?.updateProfile({displayName: u.nom + '/' + u.prenom}));
+    firebase.default.auth().onAuthStateChanged(U => U?.updateProfile({displayName: u.nom + '/' + u.prenom}));
   }
 
   signInUser(email: string, password: string) {
-    if (email === this.visiteur.email) {
-      this.afAuth.signInWithEmailAndPassword(email, password).then(
-        (user) => {
-          if (this.currentUser == null) {
-            this.currentUser = new User();
-          }
-          if(this.currentUser !== undefined) {
-            this.currentUser.email = '';
-            this.currentUser.emailVerified = true;
-            this.currentUser.uid = user.user!.uid;
-            this.currentUser.nom = '';
-            this.currentUser.prenom = 'Visiteur';
-            this.currentUser.status = Droits.visiteur;
-          }
-          this.usersServices.getUser(user.user!.uid.toString()).subscribe(u => {
-            this.currentUser = u.payload.data as User;
-          });
-      },
-      (error: any) => {
-        console.log(error);
-      });
-    }
-    return new Promise(
-      (resolve, reject) => {
-      // Identification firebase
-      this.afAuth.signInWithEmailAndPassword(email, password).then(
-        (user) => {
-          if (this.currentUser == null) {
-            this.currentUser = new User();
-          }
+    let USER: User;
+    let U: User;
+
+    return new Promise((resolve, reject) => {
+      // Ferme la connexion en cours
+      this.SignOut().finally(() => {
+      // ouverture de la nouvelle connexion
+      firebase.default.auth().signInWithEmailAndPassword(email, password).then(user => {
           this.currentFirebaseUser = user;
+          // console.log(user.user);
           // Vérifier si le mail a bien été validé
           if (user.user!.emailVerified) {
             // mail validé
-            if(this.currentUser !== undefined) {
-              this.currentUser.email = user.user!.email?.toString();
-              this.currentUser.emailVerified = true;
-              this.currentUser.uid = user.user!.uid.toString();
-              this.currentUser.nom = user.user!.displayName!.substring(0, user.user!.displayName!.indexOf('/'));
-              this.currentUser.prenom = user.user!.displayName!.substring(user.user!.displayName!.indexOf('/') + 1);
-              this.currentUser.status = Droits.visiteur;
-            }
-            // Rechercher si user est dans la BD
-            this.usersServices.getUser(user.user!.uid.toString()).subscribe(u => {
-              this.currentUser = u.payload.data as User;
+            USER = new User('', user.user?.uid, user.user!.displayName!.substring(0, user.user!.displayName!.indexOf('/')),
+            user.user!.displayName!.substring(user.user!.displayName!.indexOf('/') + 1),
+            user.user!.email?.toString(),
+            true, Droits.visiteur);
+
+              // Rechercher si user est dans la BD
+            this.usersService.getUserByUid(user.user?.uid!).subscribe(u => {
+              // console.log(u as User);
+              if(u.length <= 0) {
+                console.log(USER);
+                this.usersService.addUser(USER);
+              }
+            },
+            (error) => {
+              console.log(error.message);
             });
           } else { // mail non vérifié
             this.currentFirebaseUser = user;
             this.router.navigate(['app-unvalidate-user-message']);
           }
-          resolve(true);
-        },
-        (error: any) => {
-          console.log(error);
-          alert('Erreur de connexion, adresse mail ou mot de passe incorrect ?');
+        }).catch(error => {
+          console.log(error.message);
+          alert('Erreur de connexion, mail ou mot de passe incorrect ?');
           reject(error);
-        });
-      }
-    );
+        }).finally(() => {
+          resolve(this.currentFirebaseUser);
+        })
+      });
+    });
   }
 
+  SignOut() {
+    this.currentUser = undefined;
+    this.currentFirebaseUser = undefined;
+    return new Promise((resolve, reject) => {
+      firebase.default.auth().signOut().finally(() => {
+        resolve('utilisateur déconnecté.');
+      }).catch((error: any) => {
+        console.log(error);
+        reject(error);
+      });
+    });
+  }  
+
   sendMailNewUser() {
-    console.log('Send mail');
+    console.log('Send mail : ' + this.currentFirebaseUser?.user?.email);
     this.currentFirebaseUser?.user?.sendEmailVerification();
   }
 
-  /*
   getCurrentAuthUser() {
-    return auth().currentUser;
+    return firebase.default.auth().currentUser;
   }
-  */
 
-  ForgotPassword(passwordResetEmail: string) {
-    console.log(passwordResetEmail);
-    return this.afAuth.sendPasswordResetEmail(passwordResetEmail).then(() => {
+  ForgotPassword(Email: string) {
+    return firebase.default.auth().sendPasswordResetEmail(Email).then(() => {
       alert('Un email de réinitialisation du mot de passe vous a été envoyé, vérifiez votre boîte de réception.');
     }).catch((error) => {
+      alert('Erreur de connexion, avez-vous bien saisi l\'adresse ?.');
       console.log(error);
     });
   }
 
   connectWidthGoogle() {
+    return from(firebase.default.auth().signInWithPopup(new firebase.default.auth.GoogleAuthProvider()));
+
+    /*
     const provider = new auth.auth.GoogleAuthProvider();
     let data = [];
     return this.afAuth.signInWithPopup(provider).then(
@@ -210,16 +220,10 @@ export class AuthService {
       (error: any) => {
         console.log(error);
         alert('Erreur de connexion, adresse mail ou mot de passe incorrect ?');
-      });
+      }); */
   }
 
-  getUserFromDB(user: firebase.default.User): Observable<DocumentChangeAction<unknown>[]>{
-    return this.afStore.collection('Users', u => u.where('uid', '==', user.uid)).snapshotChanges();
-  }
-
-  addCurrentUserFromDB() {
-    return this.afStore.collection('Users').add({
-
-    });
+  getUserFromDB(user: firebase.default.User) {
+    return this.afs.collection('Users', ref => ref.where('uid', '==', user.uid)).snapshotChanges();
   }
 }

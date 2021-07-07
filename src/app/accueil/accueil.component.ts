@@ -3,8 +3,9 @@ import { Article } from '../modeles/article';
 import { Photo } from '../modeles/photo';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AuthService } from '../services/auth.service';
-import auth from 'firebase/app';
-import { Subscription } from 'rxjs';
+import * as firebase from 'firebase/app';
+import "firebase/auth";
+import "firebase/firestore";
 
 @Component({
   selector: 'app-accueil',
@@ -26,11 +27,10 @@ export class AccueilComponent implements OnInit, OnDestroy {
   pageCouranteArticle = 1;
   nbPagesPhotos = 0;
   nbPagesArticles = 0;
-  userSuscription: Subscription | undefined;
 
-  constructor(public globalService: GlobalService,
-              private authService: AuthService) {
-                this.userSuscription = this.authService.user$.subscribe(u => {
+  
+  constructor(public globalService: GlobalService) {
+                firebase.default.auth().onAuthStateChanged(u => {
     })
   }
 
@@ -39,7 +39,7 @@ export class AccueilComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.userSuscription?.unsubscribe();
+
   }
 
   onDecrementePhoto() {

@@ -50,7 +50,6 @@ export class SignUpComponent implements OnInit {
   }
 
   onSave() {
-    alert('Un email de validation vient de vous être adressé, cliquez sur le lien qui s\'y trouve pour finaliser votre inscription.\nVous pourrez ensuite vous identifier.');
     this.dialogRef.close(this.signupForm!.value);
   }
 

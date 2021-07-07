@@ -1,0 +1,42 @@
+<div class="formulaire">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div *ngIf="isFileAttached == false">
+      <h5>Vous voulez joindre une photo ?</h5>
+      <mat-form-field class="full-width">
+        <ngx-mat-file-input class="photo-input" formControlName="photo" placeholder="Cliquez ici pour sélectionner une photo" (change)="detectFiles($event)" class="file-input"></ngx-mat-file-input>
+        <mat-icon matSuffix>folder</mat-icon>
+        <mat-error *ngIf="form.get('photo')?.hasError('maxSize')">{{getErrorMessage('photo')}}</mat-error>
+      </mat-form-field>
+      <mat-progress-bar *ngIf="fileIsUploading" mode="indeterminate" color="accent"></mat-progress-bar>
+    </div>
+    <div>
+      <img class='img' src={{article?.photo}} alt="">
+    </div>
+    <mat-form-field class="full-width" *ngIf="fileUploaded">
+      <input matInput formControlName="legende" placeholder="Légende">
+      <div class="row">
+        <mat-error class="error-message" *ngIf="form.controls.legende.hasError('required')">{{getErrorMessage('legende')}}</mat-error>
+      </div>
+    </mat-form-field>
+    <mat-form-field class="full-width">
+      <input matInput formControlName="titre" placeholder="Titre">
+      <div class="row">
+        <mat-error class="error-message" *ngIf="form.controls['titre'].errors?.required">{{getErrorMessage('titre')}}</mat-error>
+        <mat-error class="error-message" *ngIf="form.controls['titre'].errors?.maxlength">{{getErrorMessage('titre')}}</mat-error>
+      </div>
+    </mat-form-field>
+    <br/>
+    <mat-form-field class="full-width">
+      <textarea matInput rows="25" cols="250" formControlName="texte" placeholder="Texte">
+      </textarea>
+      <div class="row">
+        <mat-error class="error-message" *ngIf="form.controls['texte'].errors?.required">{{getErrorMessage('texte')}}</mat-error>
+        <mat-error class="error-message" *ngIf="form.controls['texte'].errors?.minlength">{{getErrorMessage('texte')}}</mat-error>
+        <mat-error class="error-message" *ngIf="form.controls['texte'].errors?.maxlength">{{getErrorMessage('texte')}}</mat-error>
+      </div>
+    </mat-form-field>
+    <div class="button-wrapper" *ngIf="!fileIsUploading && form.valid">
+      <button mat-flat-button color="primary">Valider</button>
+    </div>
+  </form>
+</div>

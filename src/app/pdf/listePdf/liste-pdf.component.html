@@ -1,0 +1,24 @@
+  <button mat-flat-button color="accent" (click)="onAddPdf()" *ngIf="isConnected">
+    Ajouter un document.
+  </button>
+  <div *ngFor="let p of globalService.pdfs">
+    <mat-card class="card-item">
+      <mat-card-title>{{p.titre}}</mat-card-title>
+      <mat-card-content class="card-container">
+        <div>
+          <pre>{{ p.description }}</pre>
+        </div>
+        <iframe *ngIf="p.fichier == url" class="e2e-trusted-url" [src]="url | safe: 'resourceUrl'" width="100%" height="1100px"></iframe>
+        <mat-card-actions>
+          <div class="button-row">
+            <button mat-raised-button color="accent" (click)="onVoirPdf(p)" *ngIf="p.fichier==url">Fermer le document</button>
+            <button mat-raised-button color="accent" (click)="onVoirPdf(p)" *ngIf="p.fichier!=url">Ouvrir le document</button>
+            <button mat-raised-button color="accent" *ngIf="p.status==0 && canWrite" (click)="onValiderPdf(p)">Valider</button>
+            <button mat-raised-button color="warn" *ngIf="canWrite" (click)="onEditPdf(p)">Modifier</button>
+            <button mat-raised-button color="warn" *ngIf="canWrite" (click)="onDeletePdf(p)">Supprimer</button> 
+          </div>
+        </mat-card-actions>
+      </mat-card-content>
+    </mat-card>
+  </div>
+   

@@ -14,7 +14,18 @@ export class UsersServicesService {
       return this.afStore.collection('/Users').doc(id).snapshotChanges(); 
   }
 
-  addUser(u: User) {
-    
+  getUserByUid(uid: string) {
+    return this.afStore.collection('/Users', u => u.where('uid', '==', uid)).snapshotChanges(); 
+  }
+
+  addUser(user: User) {
+    return this.afStore.collection('Users').add({
+      nom: user.nom,
+      prenom: user.prenom,
+      email: user.email,
+      emailVerified: user.emailVerified,
+      uid: user.uid,
+      status: user.status
+    });
   }
 }

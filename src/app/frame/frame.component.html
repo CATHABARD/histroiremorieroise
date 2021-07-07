@@ -1,101 +1,101 @@
-
-<mat-sidenav-container class="sidenav-container">
-  <mat-sidenav #drawer class="sidenav" fixedInViewport="true" 
-  [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
-  [mode]="(isHandset$ | async) ? 'over' : 'side'" 
-  [opened]="!(isHandset$ | async)">
-    <br/>
-    <mat-nav-list>
-      <button mat-raised-button (click)="onGoAccueil()">
-        <h4>
-          <mat-icon  aria-hidden="false" aria-label="Accueil">home</mat-icon> Accueil
-        </h4>
-        <br/>
-      </button> 
-    </mat-nav-list>
-    <mat-nav-list>
-      <button mat-button (click)="onMessage()" *ngIf="globalService.isAuth">Envoyer un message.</button>
-    </mat-nav-list>
-    <h6>Articles :</h6>
-    <mat-nav-list>
-      <button mat-button *ngFor="let t of globalService.listeThemes" (click)="onEditArticle(t)">{{t.nom}}</button>
-    </mat-nav-list>
-    <h6>Photos de classes :</h6>
-    <mat-nav-list>
-      <button mat-button (click)="onEditAlbum(1901, 1910)">1901-1910</button>
+  <mat-sidenav-container class="sidenav-container">
+    <mat-sidenav #drawer class="sidenav" fixedInViewport="true" 
+    [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
+    [mode]="(isHandset$ | async) ? 'over' : 'side'" 
+    [opened]="!(isHandset$ | async)">
       <br/>
-      <button mat-button (click)="onEditAlbum(1911, 1920)">1911-1920</button>
-      <br/>
-      <button mat-button (click)="onEditAlbum(1921, 1930)">1921-1930</button>
-      <br/>
-      <button mat-button (click)="onEditAlbum(1931, 1940)">1931-1940</button>
-      <br/>
-      <button mat-button (click)="onEditAlbum(1941, 1950)">1941-1950</button>
-      <br/>
-      <button mat-button (click)="onEditAlbum(1951, 1960)">1951-1960</button>
-      <br/>
-      <button mat-button (click)="onEditAlbum(1961, 1970)">1961-1970</button>
-      <br/>
-      <button mat-button (click)="onEditAlbum(1971, 1980)">1971-1980</button>
-      <br/>
-      <button mat-button (click)="onEditAlbum(1981, 1990)">1981-1990</button>
-      <br/>
-      <button mat-button (click)="onEditAlbum(1991, 2000)">1991-2000</button>
-    </mat-nav-list>
-    <mat-nav-list>
-      <button mat-button (click)="onOpenPdf()">
-        Autres documents à voir sur Morières.
-      </button>
+      <mat-nav-list>
+        <button mat-raised-button (click)="onGoAccueil()">
+          <h4>
+            <mat-icon  aria-hidden="false" aria-label="Accueil">home</mat-icon> Accueil
+          </h4>
+          <br/>
+        </button> 
       </mat-nav-list>
-    <mat-nav-list>
-      <h6>Autres sources d'information</h6>
-    <ul>
-      <li><a href="http://www.ville-moriereslesavignon.fr/" target="_blank">Le site officiel de la ville</a></li><br/>
-    </ul>
-    <h6>A voir sur wikipedia</h6>
-    <ul>
-      <li><a href="https://fr.wikipedia.org/wiki/Mori%C3%A8res-l%C3%A8s-Avignon" target="_blank">Morières les Avignon</a></li><br/>
-      <li><a href="https://fr.wikipedia.org/wiki/Jean-Charles_de_Folard" target="_blank">Le chevalier de Folard</a></li><br/>
-      <li><a href="https://fr.wikipedia.org/wiki/Agricol_Perdiguier" target="_blank">Agricol Perdiguier</a></li><br/>
-    </ul>
-    <h6>A voir sur Petit patrimoine</h6>
-    <ul>
-      <li><a href="https://www.petit-patrimoine.com/fiche-petit-patrimoine.php?id_pp=84081_1" target="_blank">L'église de Morières</a></li>
-    </ul>
-  </mat-nav-list>
+      <mat-nav-list>
+        <button mat-button (click)="onMessage()" *ngIf="isAuth">Envoyer un message.</button>
+      </mat-nav-list>
+      <h4>Articles :</h4>
+      <mat-nav-list>
+        <button mat-button *ngFor="let t of globalService.listeThemes" (click)="onListeArticles(t)">{{t.nom}}</button>
+      </mat-nav-list>
+      <h4>Photos de classes :</h4>
+      <mat-nav-list>
+        <button mat-button (click)="onEditAlbum(1901, 1910)">1901-1910</button>
+        <br/>
+        <button mat-button (click)="onEditAlbum(1911, 1920)">1911-1920</button>
+        <br/>
+        <button mat-button (click)="onEditAlbum(1921, 1930)">1921-1930</button>
+        <br/>
+        <button mat-button (click)="onEditAlbum(1931, 1940)">1931-1940</button>
+        <br/>
+        <button mat-button (click)="onEditAlbum(1941, 1950)">1941-1950</button>
+        <br/>
+        <button mat-button (click)="onEditAlbum(1951, 1960)">1951-1960</button>
+        <br/>
+        <button mat-button (click)="onEditAlbum(1961, 1970)">1961-1970</button>
+        <br/>
+        <button mat-button (click)="onEditAlbum(1971, 1980)">1971-1980</button>
+        <br/>
+        <button mat-button (click)="onEditAlbum(1981, 1990)">1981-1990</button>
+        <br/>
+        <button mat-button (click)="onEditAlbum(1991, 2000)">1991-2000</button>
+      </mat-nav-list>
+      <mat-nav-list>
+        <button mat-button (click)="onOpenPdf()">
+          Autres documents à voir sur Morières.
+        </button>
+        </mat-nav-list>
+      <mat-nav-list>
+        <h4>Autres sources d'information</h4>
+      <ul>
+        <li><a href="http://www.ville-moriereslesavignon.fr/" target="_blank">Le site officiel de la ville</a></li><br/>
+      </ul>
+      <h4>A voir sur wikipedia</h4>
+      <ul>
+        <li><a href="https://fr.wikipedia.org/wiki/Mori%C3%A8res-l%C3%A8s-Avignon" target="_blank">Morières les Avignon</a></li><br/>
+        <li><a href="https://fr.wikipedia.org/wiki/Jean-Charles_de_Folard" target="_blank">Le chevalier de Folard</a></li><br/>
+        <li><a href="https://fr.wikipedia.org/wiki/Agricol_Perdiguier" target="_blank">Agricol Perdiguier</a></li><br/>
+      </ul>
+      <h4>A voir sur Petit patrimoine</h4>
+      <ul>
+        <li><a href="https://www.petit-patrimoine.com/fiche-petit-patrimoine.php?id_pp=84081_1" target="_blank">L'église de Morières</a></li>
+      </ul>
+    </mat-nav-list>
 
-</mat-sidenav>
-  <mat-sidenav-content>
-    <!--
-    <p><app-carousel></app-carousel></p>
-    -->
-    <mat-toolbar color="primary">
-      <button
-        type="button"
-        aria-label="Toggle sidenav"
-        mat-icon-button
-        (click)="drawer.toggle()">
-        <mat-icon aria-label="Menu latéral">menu</mat-icon>
-      </button>
-      <div class="titre"><span>Mémoire morieroise</span></div>
-      <div class="button-row">
-        <button mat-raised-button (click)="onNewCompteDialog()" *ngIf="!globalService.isAuth">
-          Créer mon compte
+  </mat-sidenav>
+    <mat-sidenav-content>
+      <!--
+      <p><app-carousel></app-carousel></p>
+      -->
+      <mat-toolbar color="primary">
+        <button
+          type="button"
+          aria-label="Toggle sidenav"
+          mat-icon-button
+          (click)="drawer.toggle()">
+          <mat-icon aria-label="Menu latéral">menu</mat-icon>
         </button>
-        <button mat-raised-button (click)="onConnectWidthGoogleDialog()" *ngIf="!globalService.isAuth">
-          Me connecter via mon compte Google
-        </button>
-        <button mat-raised-button (click)="onConnectDialog()" *ngIf="!globalService.isAuth" color="accent">
-          Me connecter
-        </button>
-        <button mat-raised-button (click)="onDisconnectDialog()" *ngIf="globalService.isAuth">
-          Me déconnecter
-        </button>
-        <button mat-raised-button (click)="onAdmin()" *ngIf="isAdmin" color="warn">
-          Administration
-        </button>
-      </div>
-    </mat-toolbar>
-    <router-outlet></router-outlet>
-  </mat-sidenav-content>
-</mat-sidenav-container>
+        <div class="titre"><span>Mémoire morieroise</span></div>
+        <div class="button-row">
+          <button class="button" mat-raised-button (click)="onNewCompteDialog()" *ngIf="!isAuth">
+            Créer mon compte
+          </button>
+          <button class="button" mat-raised-button (click)="onConnectWidthGoogleDialog()" *ngIf="!isAuth">
+            Me connecter via mon compte Google
+          </button>
+          <button class="button" mat-raised-button (click)="onConnectDialog()" *ngIf="!isAuth" color="accent">
+            Me connecter
+          </button>
+          <button class="button" mat-raised-button (click)="onDisconnectDialog()" *ngIf="isAuth">
+            Me déconnecter
+          </button>
+          <button class="button" mat-raised-button (click)="onAdmin()" *ngIf="isAdmin" color="warn">
+            Administration
+          </button>
+        </div>
+        <h4 class="button">Bonjour : {{userMail}}</h4>
+      </mat-toolbar>
+      <router-outlet></router-outlet>
+    </mat-sidenav-content>
+  </mat-sidenav-container>

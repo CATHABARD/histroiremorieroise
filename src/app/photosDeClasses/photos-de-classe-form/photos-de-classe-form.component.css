@@ -1,0 +1,45 @@
+.connexion-form {
+    min-width: 150px;
+    max-width: 500px;
+    width: 100%;
+    align-items: center;
+  }
+  
+  .full-width {
+    width: 100%;
+  }
+
+  .error-message {
+    font-size: small;
+    color: red;
+    margin-top: 10px;
+    margin-left: 10px;
+  }
+
+  .example-container {
+    display: flex;
+    flex-direction: column;
+  }
+ 
+  .example-right-align {
+    text-align: right;
+  }
+  
+  input.example-right-align::-webkit-outer-spin-button,
+  input.example-right-align::-webkit-inner-spin-button {
+    display: none;
+  }
+  
+  input.example-right-align {
+    -moz-appearance: textfield;
+  }
+
+  .img {
+    max-width: 30%;
+    max-height: 25%;
+    align-content: left;
+  }
+
+  .button {
+    text-align: center;
+  }

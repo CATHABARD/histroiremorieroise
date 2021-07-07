@@ -1,0 +1,4 @@
+<h4 *ngIf="pdf">Edition du document : {{pdf.titre}}</h4>
+<div class="container">
+    <app-pdf-form *ngIf="pdf" [pdf]="pdf"></app-pdf-form>
+</div>

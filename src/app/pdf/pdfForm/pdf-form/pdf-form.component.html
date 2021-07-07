@@ -1,0 +1,32 @@
+<div class="formulaire">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <mat-form-field class="full-width" *ngIf="!fileUploaded">
+      <ngx-mat-file-input class="photo-input" formControlName="fichier" placeholder="Cliquez ici pour sélectionner un fichier" (change)="detectFiles($event)" class="file-input" [accept]="'.pdf'"></ngx-mat-file-input>
+      <mat-icon matSuffix>folder</mat-icon>
+      <mat-error>{{getErrorMessage('pdf')}}</mat-error>
+    </mat-form-field>
+    <mat-form-field class="full-width" appearance="outline" color="secondary" *ngIf="fileIsUploading">
+        <mat-progress-bar mode="indeterminate" *ngIf="fileIsUploading">{{globalService.bytesTransfered}}%</mat-progress-bar>
+    </mat-form-field>
+    <br/>
+    <mat-form-field class="full-width">
+      <input matInput formControlName="titre" placeholder="Titre">
+      <div class="row">
+        <mat-error class="error-message" *ngIf="form.controls.titre.hasError('required')">{{getErrorMessage('titre')}}</mat-error>
+        <mat-error class="error-message" *ngIf="form.controls.titre.hasError('maxLength')">{{getErrorMessage('titre')}}</mat-error>
+    </div>
+    </mat-form-field>
+    <br/>
+    <mat-form-field class="full-width">
+      <input matInput formControlName="description" placeholder="Description" style="width: 1000px;">
+      <div class="row">
+        <mat-error class="error-message" *ngIf="form.controls['description'].errors?.required">{{getErrorMessage('description')}}</mat-error>
+        <mat-error class="error-message" *ngIf="form.controls['description'].errors?.minlength">{{getErrorMessage('description')}}</mat-error>
+        <mat-error class="error-message" *ngIf="form.controls['description'].errors?.maxlength">{{getErrorMessage('description')}}</mat-error>
+      </div>
+    </mat-form-field>
+    <div class="button-wrapper" *ngIf="!fileIsUploading && form.valid">
+      <button mat-flat-button color="primary">Valider</button>
+    </div>
+  </form>
+</div>

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { GlobalService } from './global.service';
+import { GlobalService, Status } from './global.service';
 import { Photo } from '../modeles/photo';
+import { AngularFirestore } from '@angular/fire/firestore';
 
 @Injectable({
   providedIn: 'root'
@@ -8,16 +9,30 @@ import { Photo } from '../modeles/photo';
 export class PhotosService {
   public photo: Photo| undefined;
 
-  constructor(private globalService: GlobalService) { } 
+  constructor(private afs: AngularFirestore) { } 
 
-  public addNewPhoto(photo: Photo) {
-    // this.globalService.addPhoto(this.photo);
+  public addPhoto(p: Photo) {
+    this.afs.collection('Photos').add({
+      annee: p.annee,
+      auteur: p.auteur,
+      nomAuteur: p.nomAuteur,
+      listeEleves: p.listeEleves,
+      photo: p.photo,
+      titre: p.titre,
+      status: Status.initial
+    });
+  }
+
+  getPhotos() {
+    return this.afs.collection('Photos').snapshotChanges();
   }
 
   getPhoto(id: string) {
-    /* this.globalService.GetSinglePhotoFromDB(id).subscribe(data => {
-      this.photo = data.data() as Photo;
-      this.photo.id = data.id;
-    }); */
+    return this.afs.collection('Photos').doc(id).snapshotChanges();
   }
+
+  public getPhotosByPeriode(debut: number, fin: number) {
+    return this.afs.collection('Photos', ref => ref.where('annee', '>=', debut).where('annee', '<=', fin)).snapshotChanges();
+  }
+
 }
