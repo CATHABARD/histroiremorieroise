@@ -7,17 +7,18 @@ import { User } from '../modeles/user';
 import { AngularFirestore, DocumentChangeAction } from '@angular/fire/firestore';
 import { from, Observable, Subject, Subscription } from 'rxjs';
 import { Pdf } from '../modeles/pdf';
-import { AuthService } from './auth.service';
 import {
   AngularFireStorage,
   AngularFireUploadTask,
 } from '@angular/fire/storage';
-import { switchMap } from 'rxjs/operators';
+import { shareReplay, switchMap } from 'rxjs/operators';
 import * as firebase from 'firebase/app';
 import "firebase/auth";
 import "firebase/firestore";
 import { PhotosService } from './photos.service';
 import { ArticlesService } from './articles.service';
+import { UsersServicesService } from './users-services.service';
+import { AuthService } from './auth.service';
 
 export interface FilesUploadMetadata {
   uploadProgress: Observable<number | undefined>;
@@ -50,17 +51,20 @@ export class GlobalService {
 
   public bytesTransfered: number = 0;
 
+  private userSubscription: Subscription;
+  private isConnected = false;
+
   constructor(private afs: AngularFirestore,
               private readonly afSto: AngularFireStorage,
               private photosService: PhotosService,
-              private articlesService: ArticlesService) {
-                firebase.default.auth().onAuthStateChanged(u => {
-                  if(u != null && u.uid != '') {
-                    // this.initData();
-                  }
+              private articlesService: ArticlesService,
+              private usersService: UsersServicesService,
+              private authService: AuthService) {
+                
+                this.userSubscription = this.authService.authSubject.pipe(shareReplay(1)).subscribe(u => {
+                    this.isConnected = true;
                 })
-
-  }
+              }
 
   emitPdf() {
     this.pdfSubject.next(true);
@@ -71,15 +75,15 @@ export class GlobalService {
   }
 
 
-    public initData() {
+  public initData() {
     return new Promise((resolve, reject) => {
-      if (firebase.default.auth().currentUser != null) {
+      this.authService.signInVisiteur().then(u => {
         this.GetThemesFromDB().subscribe(t => {
           this.listeThemes = t.map(e => {
-            const T = e.payload.doc.data() as Theme;
-            T.id = e.payload.doc.id;
-            return T;
-          });
+          const T = e.payload.doc.data() as Theme;
+          T.id = e.payload.doc.id;
+          return T;
+        })
           // console.log(this.listeThemes);
           this.listeThemes.forEach(theme => {
             this.articlesService.getArticlesOfTheme(theme).subscribe(data => {
@@ -90,7 +94,14 @@ export class GlobalService {
               });
               theme.articles?.forEach(a => {
                 if (a.auteur && a.auteur.length > 0) {
-                  this.getAuteurById(a);
+                  this.usersService.getUserByUid(a.auteur).subscribe(u => {
+                    u.filter(U => {
+                      a.nomAuteur = (U.payload.doc.data() as User).prenom;
+                    })
+                  },
+                  (error) => {
+                    console.log('erreur du chargement de l\'auteur' + error.message);
+                  });
                 }
               });
             },
@@ -107,7 +118,6 @@ export class GlobalService {
               p.id = e.payload.doc.id;
               return p;
             });
-            this.emitPhoto();
             // Chargement de tous les articles
             this.articlesService.getArticles().subscribe(a => {
               this.allArticles = a.map(e => {
@@ -115,29 +125,40 @@ export class GlobalService {
                 A.id = e.payload.doc.id;
                 return A;
               });
-              this.allArticles.forEach(A => {
-                if (A.auteur && A.auteur.length > 0) {
-                  this.getAuteurById(A);
-                }
-              });
+              this.allArticles.forEach((A: Article) => {
+              if (A.auteur && A.auteur.length > 0) {
+                this.usersService.getUserByUid(A.auteur).subscribe(u => {
+                  u.filter(U => {
+                    A.nomAuteur = (U.payload.doc.data() as User).prenom;
+                  })
+                });
+              }
             });
             if (this.listeThemes.length > 0) {
               this.currentTheme = this.listeThemes[0];
             }
-            resolve(this.listeThemes);
           },
           (error) => {
             console.log('Erreur getPhotos :' + error);
             reject(error);
+          },
+          () => { // fin du chargement des photos
+            resolve(this.listeThemes);
           });
         },
         (error) => {
-          console.log('erreur chargement des Themes');
-          console.log(error);
+          console.log('erreur chargement des Themes \n' + error.message);
           reject(error);
         });
+      },
+      () => {
+
       }
-    });
+    )
+
+      })
+
+    })
   }
 
   // Articles
@@ -179,38 +200,6 @@ export class GlobalService {
   }
 
   // User
-  private getAuteurById(a: any) {
-    this.afs.collection('Users', ref => ref.where('uid', '==', a.auteur)).snapshotChanges().subscribe(data => {
-        const auteurs = data.map(u => {
-          const d = u.payload.doc.data() as User;
-          d.id = u.payload.doc.id;
-          return d;
-        });
-        if (auteurs.length > 0) {
-          a.nomAuteur = auteurs[0].prenom;
-        }
-    },
-    (error) => {
-      console.log('Erreur : ' + error);
-    },
-    () => {
-
-    });
-  }
-
-  public getUserPhotoById(p: Photo) {
-    this.afs.collection('Users').doc(p.auteur).get().subscribe(data => {
-      const u = data.data() as User;
-      p.nomAuteur = u.prenom;
-  },
-  (error) => {
-    console.log('Erreur : ' + error);
-  },
-  () => {
-
-  });
-}
-
   public getAllUsersFromDB() {
     return this.afs.collection('Users').snapshotChanges();
   }
@@ -233,18 +222,6 @@ export class GlobalService {
 
   public GetSinglePhotoFromDB(id: string) {
     return this.afs.collection('Photos').doc(id).get();
-  }
-
-  public updatePhotoToDB(p: Photo) {
-    this.afs.collection('Photos').doc(p.id).update(
-      {
-        auteur: p.auteur,
-        titre: p.titre,
-        annee: p.annee,
-        listeEleves: p.listeEleves,
-        photo: p.photo,
-        status: p.status
-      });
   }
 
   public getPhotosAValider() {

@@ -4,60 +4,59 @@ import { Article } from '../../modeles/article';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { AuthService } from 'src/app/services/auth.service';
-import * as firebase from 'firebase';
+import { Subscription } from 'rxjs';
+import { shareReplay } from 'rxjs/operators';
 
 @Component({
   selector: 'app-liste-articles',
   templateUrl: './liste-articles.component.html',
   styleUrls: ['./liste-articles.component.css']
 })
-export class ListeArticlesComponent implements OnInit {
+export class ListeArticlesComponent implements OnInit, OnDestroy {
   public article: Article | undefined;
-  public userIsConnected = false;
+  public isConnected = false;
   public canWrite = false;
+
+  private userSubscription: Subscription;
 
   constructor(public globalService: GlobalService,
               public authService: AuthService,
               private router: Router,
               private matDialog: MatDialog) {
 
-    if(this.authService.getCurrentFirebaseUser() != undefined) {
-      this.userIsConnected = true;
-    } else {
-      this.userIsConnected = false;
-    }
-    // Appelé lors de la connexion d'un utilisateur
-    firebase.default.auth().onAuthStateChanged((u) => {
-        this.userIsConnected = (u != null);
-        if (this.userIsConnected === true) {
-          const d = this.authService.getCurrentUser()?.status;
+    this.userSubscription = this.authService.authSubject.pipe(shareReplay(1)).subscribe(u => {
+      if (u != null) {
+        this.isConnected = (u != null && u.email?.trim() != authService.getVisiteur()?.trim());
+        if (this.isConnected) {
+          const d = this.authService.getStatus();
+          console.log(authService.getCurrentUser()?.email);
+          console.log(d);
           // tslint:disable-next-line:no-bitwise
-          if ((d! & Droits.editArticle) === Droits.editArticle) {
+          if (d != undefined && (d & Droits.editArticle) == Droits.editArticle) {
             this.canWrite = true;
           } else {
-            this.canWrite = true;
+            this.canWrite = false;
           }
-      } else {
-        this.canWrite = false;
+        } else {
+          this.canWrite = false;
+        }
       }
-    });
+    })
   }
 
   ngOnInit() {
-    if (this.authService.getCurrentUser() != undefined) {
-      const d = this.authService.getCurrentUser()?.status;
-      // tslint:disable-next-line:no-bitwise
-      if ((d! & Droits.editArticle) === Droits.editArticle) {
-        this.canWrite = true;
-      } else {
-        this.canWrite = false;
-      }
+
+  }
+
+  ngOnDestroy() {
+    if( this.userSubscription != null) {
+      this.userSubscription.unsubscribe();
     }
- }
+  }
 
   onEdit(a: Article) {
     this.router.navigate(['app-edit-article/', a.id]);
-  }
+ }
 
   onAddArticle() {
     this.router.navigate(['app-add-article']);

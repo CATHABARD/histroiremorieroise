@@ -10,12 +10,16 @@ export class UsersServicesService {
 
   constructor(private afStore: AngularFirestore) { }
 
-  getUser(id: string): Observable<Action<DocumentSnapshot<unknown>>> {
-      return this.afStore.collection('/Users').doc(id).snapshotChanges(); 
+  getUsers() {
+    return this.afStore.collection('Users').snapshotChanges(); 
+}
+
+  getUser(id: string) {
+      return this.afStore.collection('Users').doc(id).snapshotChanges(); 
   }
 
   getUserByUid(uid: string) {
-    return this.afStore.collection('/Users', u => u.where('uid', '==', uid)).snapshotChanges(); 
+    return this.afStore.collection('Users', u => u.where('uid', '==', uid)).snapshotChanges(); 
   }
 
   addUser(user: User) {

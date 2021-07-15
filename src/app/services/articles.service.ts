@@ -32,6 +32,7 @@ export class ArticlesService {
   }
 
   getArticle(id: string) {
+    console.log(id);
     return this.afs.collection('Articles').doc(id).snapshotChanges();
 }
 

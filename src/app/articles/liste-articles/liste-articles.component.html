@@ -1,10 +1,10 @@
-<h5>Articles sur le thème : [{{globalService.currentTheme?.nom}}]</h5>
+<h4>Articles sur le thème : [{{globalService.currentTheme?.nom}}]</h4>
 
-<button mat-flat-button *ngIf="userIsConnected == true" color='accent' (click)="onAddArticle()">
+<button mat-flat-button *ngIf="isConnected" color='accent' (click)="onAddArticle()">
   Ajouter un article sur ce thème.
 </button>
 <div *ngIf="globalService.currentTheme">
-  <div *ngFor="let a of globalService.currentTheme.articles">
+  <div *ngFor="let a of globalService.currentTheme?.articles">
     <mat-card class="card-item">
       <mat-card-title>{{a.titre}} (par : {{a.nomAuteur}}) (Cliquez sur la photo pour l'agrandir.)</mat-card-title>
       <mat-card-subtitle >{{a.legende}}</mat-card-subtitle>

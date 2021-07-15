@@ -1,8 +1,8 @@
-<h5>Photos de classes</h5>
+<h4>Photos de classes</h4>
 <button mat-flat-button *ngIf="isConnected" color='accent' (click)="onAddPhoto()">
     Ajouter une photo de classe..
 </button>
-<div *ngFor="let p of globalService.listePhotos">
+<div *ngFor="let p of listePhotos">
     <mat-card class="card">
     <mat-card-title>{{p.titre}} par : {{p.nomAuteur}} (Cliquez sur la  photo pour l'agrandir.)</mat-card-title>
     <mat-card-subtitle>{{p.annee}}</mat-card-subtitle>

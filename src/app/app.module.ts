@@ -60,11 +60,6 @@ import { AddPhotoDeClasseComponent } from './photosDeClasses/add-photo-de-classe
 import { AlbumComponent, DialogMaximiseImageComponent } from './photosDeClasses/album/album.component'
 import { EditPhotoDeClasseComponent } from './photosDeClasses/edit-photo-de-classe/edit-photo-de-classe.component'
 import { PhotosDeClasseFormComponent} from './photosDeClasses/photos-de-classe-form/photos-de-classe-form.component'
-
-import { GlobalService } from './services/global.service';
-import { AuthGuardService } from './services/auth-guard.service';
-import { AuthService } from './services/auth.service';
-import { PhotosService } from './services/photos.service';
 import { AddPdfComponent } from './pdf/addPdf/add-pdf/add-pdf.component'
 import { EditPdfComponent } from './pdf/editPdf/edit-pdf/edit-pdf.component'
 import { ListePdfComponent } from './pdf/listePdf/liste-pdf.component'
@@ -73,6 +68,11 @@ import { AddArticleComponent} from './articles/add-article/add-article.component
 import { ArticleFormComponent } from './articles/article-form/article-form.component'
 import { EditArticleComponent } from './articles/edit-article/edit-article.component'
 import { DialogMaximiseArticleImageComponent, ListeArticlesComponent } from './articles/liste-articles/liste-articles.component'
+
+import { GlobalService } from './services/global.service';
+import { AuthGuardService } from './services/auth-guard.service';
+import { AuthService } from './services/auth.service';
+import { PhotosService } from './services/photos.service';
 
 import { AngularFireModule } from '@angular/fire';
 import { AngularFireStorageModule } from '@angular/fire/storage'

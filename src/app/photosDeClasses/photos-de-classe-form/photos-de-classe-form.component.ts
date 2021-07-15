@@ -44,32 +44,27 @@ export class PhotosDeClasseFormComponent implements OnInit {
                 if (this.photo.photo == undefined) {
                   this.photo.photo = '';
                 }
-                if (this.photo?.id === '') {
+                // S'il s'agit d'une création
                   this.addPhotoForm = this.formBuilder.group({
-                    photo: [undefined, [Validators.required, FileValidator.maxContentSize(this.maxSize)]],
+                    // , [Validators.required, FileValidator.maxContentSize(this.maxSize)]
+                    photo: [undefined],
                     progressbar: ['Progression'],
+                    legende: ['', [Validators.maxLength(50)]],
                     titre: ['', [Validators.required, Validators.maxLength(50)]],
                     annee: ['', [Validators.required, Validators.min(1900), Validators.max(2020)]],
                     listeEleves: ['', [Validators.required, Validators.maxLength(3000)]]
                   });
-                } else {
-                  this.addPhotoForm = this.formBuilder.group({
-                    photo: [{ value: undefined, disabled: true }],
-                    progressbar: [{value: 'Progression', disabled: true }, null],
-                    titre: [this.photo?.titre, [Validators.required, Validators.maxLength(50)]],
-                    annee: [this.photo?.annee?.toString(), [Validators.required, Validators.min(1900), Validators.max(2020)]],
-                    listeEleves: [this.photo?.listeEleves, [Validators.required, Validators.maxLength(3000)]]
-                  });
                   this.fileUploaded = true;
-                  }
+  }
             
-              }
-
   ngOnInit() {
     this.initForm();
   }
 
   initForm() {
+    this.addPhotoForm.controls.titre.setValue(this.photo?.titre);
+    this.addPhotoForm.controls.listeEleves.setValue(this.photo?.listeEleves);
+    this.addPhotoForm.controls.annee.setValue(this.photo?.annee);
   }
 
   onSubmit() {
@@ -77,18 +72,19 @@ export class PhotosDeClasseFormComponent implements OnInit {
       alert('Une valeur saisie est incorrecte.');
       return;
     }
-    // console.log(this.form.get('annee').value, this.form.get('listeEleves').value);
     this.photo!.titre = this.addPhotoForm?.get('titre')?.value;
     this.photo!.annee = this.addPhotoForm?.get('annee')?.value;
     this.photo!.listeEleves = this.addPhotoForm?.get('listeEleves')?.value;
 
+    // S'il s'agit d'une création
     if (this.photo!.id  === '') {
       this.photo!.photo = this.fileUrl;
       this.photo!.auteur = this.authService.getCurrentUser()?.id;
       this.photo!.nomAuteur = this.authService.getCurrentUser()?.prenom;
       this.photosService.addPhoto(this.photo!);
-    } else {
-      this.globalService.updatePhotoToDB(this.photo!);
+    } else { // S'il s'agit d'une modification
+      console.log(this.photo);
+      this.photosService.updatePhoto(this.photo!);
     }
     this.location.back();
   }

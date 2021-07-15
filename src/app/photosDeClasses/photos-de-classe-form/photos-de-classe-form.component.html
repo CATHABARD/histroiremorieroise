@@ -15,7 +15,7 @@
   <div *ngIf="photo?.photo ==''">
     <img *ngIf="photo?.photo != undefined" class='img' src={{photo?.photo}}>
   </div>
-  <div *ngIf="fileUploaded">
+  <div>
     <mat-form-field class="full-width">
       <input matInput type="number" placeholder="Année" formControlName="annee">
       <div class="row">
@@ -30,7 +30,7 @@
     </mat-form-field>
     <br/>
     <mat-form-field class="full-width">
-      <textarea matInput maxRows="10" cols="300" placeholder="Liste des élèves" formControlName="listeEleves"></textarea>
+      <textarea matInput rows="10" maxRows="20" cols="300" placeholder="Liste des élèves" formControlName="listeEleves"></textarea>
       <div class="row">
         <mat-error class="error-message" *ngIf="addPhotoForm.controls.listeEleves.hasError('required')">{{getErrorMessage('listeEleves')}}</mat-error>
       </div>

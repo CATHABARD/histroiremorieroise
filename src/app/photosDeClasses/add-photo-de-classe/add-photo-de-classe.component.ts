@@ -1,10 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Photo } from '../../modeles/photo';
-import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
-import { shareReplay } from 'rxjs/operators';
 import { AuthService } from 'src/app/services/auth.service';
 import * as firebase from 'firebase';
+import { Subscription } from 'rxjs';
+import { shareReplay } from 'rxjs/operators';
+import { Status } from 'src/app/services/global.service';
 
 @Component({
   selector: 'app-add-photo-de-classe',
@@ -16,14 +16,15 @@ export class AddPhotoDeClasseComponent implements OnInit {
   isConnected = false;
   userDroits: number | undefined = 0;
 
-  constructor(private route: ActivatedRoute,
-              private authService: AuthService) {
+  private userSubscription: Subscription;
+
+  constructor(private authService: AuthService) {
       this.photo = new Photo('', undefined, this.authService.getCurrentUser()?.id, '', '', '');
-      firebase.default.auth().onAuthStateChanged(u => {
-        (u == null)? this.isConnected = false: this.isConnected = true;
-      this.userDroits = this.authService.getCurrentUser()?.status;
-    });
-  }
+
+      this.userSubscription = this.authService.authSubject.pipe(shareReplay(1)).subscribe(u => {
+        this.isConnected = (u.status! > Status.initial);
+      })
+    }
 
   ngOnInit() {
 

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { Router, ActivatedRoute } from '@angular/router';
 import { GlobalService, Droits } from 'src/app/services/global.service';
@@ -6,7 +6,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { Photo } from '../../modeles/photo';
 import { PhotosService } from 'src/app/services/photos.service';
 import { AuthService } from 'src/app/services/auth.service';
-import * as firebase from 'firebase';
+import { UsersServicesService } from 'src/app/services/users-services.service';
+import { User } from 'src/app/modeles/user';
+import { shareReplay } from 'rxjs/operators';
 
 @Component({
   selector: 'app-album',
@@ -25,95 +27,89 @@ export class AlbumComponent implements OnDestroy {
   debut = 0;
   fin = 0;
 
+  private userSubscription: Subscription | undefined;
+
   constructor(public route: ActivatedRoute,
               private router: Router,
               public photosService: PhotosService,
               public globalService: GlobalService,
+              private usersService: UsersServicesService,
               private authService: AuthService,
               private matDialog: MatDialog) {
-
+      let d: number | undefined;
       this.canWrite = false;
-      firebase.default.auth().onAuthStateChanged(u => {
-        (connected: boolean) => {
-          (u == null)? this.isConnected = false : this.isConnected = true;
-          this.isConnected = connected;
-          if (this.isConnected && this.authService.getCurrentUser() != undefined) {
-            const d = this.authService.getCurrentUser()?.status;
-            // tslint:disable-next-line:no-bitwise
-            if ((d! & Droits.editPhotosDeClasse) === Droits.editPhotosDeClasse) {
-              this.canWrite = true;
-            } else {
-              this.canWrite = false;
-            }
+      this.userSubscription = this.authService.authSubject.pipe(shareReplay(1)).subscribe(u => {
+        console.log(u);
+        this.isConnected = (u != null && u.email?.trim() != authService.getVisiteur()?.trim());
+        if (this.isConnected) {
+          d = u.status;
+          // tslint:disable-next-line:no-bitwise
+          if ((d! & Droits.editPhotosDeClasse) === Droits.editPhotosDeClasse) {
+            this.canWrite = true;
+          } else {
+            this.canWrite = false;
+          }
         } else {
           this.canWrite = false;
         }
-      };
 
-      if (this.authService.getCurrentUser() != undefined) {
-        const d = this.authService.getCurrentUser()?.status;
         // tslint:disable-next-line:no-bitwise
         if ((d! & Droits.editPhotosDeClasse) === Droits.editPhotosDeClasse) {
           this.canWrite = true;
         } else {
           this.canWrite = false;
         }
-      }
+      })
 
       this.queryParamsSuscription = this.route.queryParamMap.subscribe(param => {
-        if (param.has('debut')) {
-          this.debut = 0;
-          this.fin = 0;
-          const D = (param.get('debut') as unknown) as number;
-          const F = (param.get('fin') as unknown) as number;
-
-          if (param.get('debut') != null && (D) != this.debut) {
-            this.debut = D;
-          }
-          if (F != null && F !== this.fin) {
-            this.fin = F;
-            this.isCompleted();
-          }
+        if (param.has('debut') && param.has('fin')) {
+          this.debut = (param.get('debut') as unknown) as number;
+          this.fin = (param.get('fin') as unknown) as number;
+          this.CherchePhotos();
         }
       },
       (error) => {
         console.log('Erreur : ' + error);
       });
-    });   
   }
 
   ngOnDestroy() {
     if (this.queryParamsSuscription != null) {
       this.queryParamsSuscription.unsubscribe();
     }
-  }
-
-  isCompleted() {
-    if (this.debut !== 0 &&
-        this.fin !== 0) {
-      this.globalService.listePhotos = [];
-      this.chargePhotos();
+    if( this.userSubscription != null) {
+      this.userSubscription.unsubscribe();
     }
   }
 
-  chargePhotos() {
-    this.globalService.listePhotos.splice(0);
+  CherchePhotos() {
+    if (this.debut != 0 && this.fin != 0) {
+      this.filtrePhotos();
+      console.log(this.listePhotos);
+      this.addPrenomAuteur();
+    }
+  }
 
-    this.photosService.getPhotosByPeriode(this.debut, this.fin).subscribe(photos => {
-      this.listePhotos = photos.filter(v => {
-        if ((v.payload.doc.data() as Photo).status === 1) {
-           return true;
+  filtrePhotos() {
+    this.listePhotos.splice(0);
+    this.listePhotos = this.globalService.allPhotos.filter(p => {
+      if(p.status == 1) {
+        if(p.annee! >= this.debut && p.annee! <= this.fin) {
+          return true;
         } else {
           return false;
         }
-      }).map(item => {
-        const d = item.payload.doc.data() as Photo;
-        d.id = item.payload.doc.id;
-        this.globalService.getUserPhotoById(d);
-        return d;
-      },
-      (error: any) => {
-        console.log('Erreur de chargement des photos ' + error);
+      } else {
+        return false;
+      };
+    });
+  }
+
+  addPrenomAuteur() {
+    this.listePhotos.forEach(p => {
+      this.usersService.getUser(p.auteur!).subscribe(u => {
+          const auteur = u.payload.data() as User;
+          p.nomAuteur = auteur.prenom;
       });
     });
   }
@@ -131,7 +127,7 @@ export class AlbumComponent implements OnDestroy {
   }
 
   onEdit(p: Photo) {
-    this.router.navigate(['app-edit-photo-de-classe/', p.id]);
+    this.router.navigate(['app-edit-photo-de-classe', p.id]);
   }
 
   onSurvol(p: Photo) {

@@ -2,7 +2,6 @@ import { Component, OnInit, Input } from '@angular/core';
 import { Article } from '../../modeles/article';
 import { FormGroup, FormBuilder, Validators, Form } from '@angular/forms';
 import { GlobalService } from 'src/app/services/global.service';
-import { FileValidator } from 'ngx-material-file-input';
 import { EditArticleComponent } from '../edit-article/edit-article.component';
 import { Observable } from 'rxjs';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
@@ -24,8 +23,8 @@ export class ArticleFormComponent implements OnInit {
   errorMessage: string = '';
   fileIsUploading = false;
   fileUrl: string = '';
-  fileUploaded = false;
-  isFileAttached: boolean;
+  fileUploaded = true;
+  isFileAttached: boolean = false;
 
   readonly maxSize = 100000000;
 
@@ -40,67 +39,61 @@ export class ArticleFormComponent implements OnInit {
               private articlesService: ArticlesService,
               private location: Location,
               private breakpointObserver: BreakpointObserver) {
-                if (this.article?.id === '') {
-                  this.isFileAttached = false;
                   this.form = this.formBuilder.group({
-                  photo: [undefined, [FileValidator.maxContentSize(this.maxSize)]],
-                  progressbar: ['Progression'],
-                  legende: [''],
-                  titre: ['', [Validators.required, Validators.maxLength(60)]],
-                  texte: ['', [Validators.required, Validators.minLength(20), Validators.maxLength(6500)]],
-                });
-              } else {
-                if (this.article?.photo !== '') {
-                  this.isFileAttached = true;
-                } else {
-                  this.isFileAttached = false;
+                    photo: [{ value: this.article?.photo, visible: this.isFileAttached }],
+                    progressbar: [{value: 'Progression', visible: this.isFileAttached }],
+                    legende: ['', [Validators.maxLength(50)]],
+                    titre: ['', [Validators.required, Validators.maxLength(60)]],
+                    texte: ['', [Validators.required, Validators.minLength(20), Validators.maxLength(6500)]]
+                  });
                 }
-                this.form = this.formBuilder.group({
-                  photo: [{ value: undefined, visible: this.isFileAttached }],
-                  progressbar: [{value: 'Progression', visible: this.isFileAttached }],
-                  legende: [this.article?.legende],
-                  titre: [this.article?.titre, [Validators.required, Validators.maxLength(60)]],
-                  texte: [this.article?.texte, [Validators.required, Validators.minLength(20), Validators.maxLength(6500)]],
-                });
-                this.fileUploaded = true;
-              }
-           }
+              
 
   ngOnInit() {
     this.initForm();
-  }
+    (this.article?.photo != undefined)? this.fileUrl = this.article?.photo : '';
+    this.form.controls.photo.setValue(this.fileUrl);
+    this.form.controls.legende.setValue(this.article?.legende);
+    this.form.controls.titre.setValue(this.article?.titre);
+    this.form.controls.texte.setValue(this.article?.texte);
+    if (this.article?.photo !== '') {
+      this.isFileAttached = true;
+    } else {
+      this.isFileAttached = false;
+    } 
+}
 
   initForm() {
-  }
+}
 
   getErrorMessage(ctrl: string) {
     let msg = '';
 
     switch (ctrl) {
       case 'photo':
-        if (this.form.controls.photo.touched) {
-          msg = this.form.controls.photo.hasError('maxSize') ? 'Vous devez sélectionner une photo de moins de 100mo' : '';
+        if (this.form?.controls.photo.touched) {
+          msg = this.form?.controls.photo.hasError('maxSize') ? 'Vous devez sélectionner une photo de moins de 100mo' : '';
         }
         break;
       case 'titre':
-        if (this.form.controls.titre.touched) {
-          if (this.form.controls.titre.hasError('required')) {
+        if (this.form?.controls.titre.touched) {
+          if (this.form?.controls.titre.hasError('required')) {
             msg = 'Vous devez saisir un titre.';
           }
-          if (this.form.controls.titre.hasError('maxlength')) {
+          if (this.form?.controls.titre.hasError('maxlength')) {
             msg = 'Le titre ne doit pas comporter plus de 60 caractères.';
           }
         }
         break;
       case 'texte':
-        if (this.form.controls.texte.touched) {
-          if (this.form.controls.texte.hasError('required')) {
+        if (this.form?.controls.texte.touched) {
+          if (this.form?.controls.texte.hasError('required')) {
             msg = 'Vous devez saisir un texte.';
           }
-          if (this.form.controls.texte.hasError('minlength')) {
+          if (this.form?.controls.texte.hasError('minlength')) {
             msg = 'Le texte doit comporter plus de 20 caractères.';
           }
-          if (this.form.controls.texte.hasError('maxlength')) {
+          if (this.form?.controls.texte.hasError('maxlength')) {
             msg = 'Le texte ne doit pas comporter plus de 6500 caractères.';
           }
         }
@@ -124,11 +117,11 @@ export class ArticleFormComponent implements OnInit {
   }
 
   onSubmit() {
-    (this.article != undefined)? this.article.titre =  this.form.get('titre')?.value : '';
-    (this.article != undefined)? this.article.texte =  this.form.get('texte')?.value : '';
+    (this.article != undefined)? this.article.titre =  this.form?.get('titre')?.value : '';
+    (this.article != undefined)? this.article.texte =  this.form?.get('texte')?.value : '';
     (this.article != undefined)? this.article.idTheme = this.globalService.currentTheme?.id : '';
-    (this.article != undefined)? this.article.photo = this.fileUrl : '';
-    (this.article != undefined)? this.article.legende = this.form.get('legende')?.value : '';
+    (this.article != undefined)? this.article.photo = this.fileUrl: '';
+    (this.article != undefined)? this.article.legende = this.form?.get('legende')?.value : '';
     // Ajouter un article
     if (this.article?.id === '') {
       this.article.auteur = this.authService.getCurrentUser()?.uid;

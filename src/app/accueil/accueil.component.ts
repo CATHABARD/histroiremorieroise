@@ -2,8 +2,6 @@ import { GlobalService } from '../services/global.service';
 import { Article } from '../modeles/article';
 import { Photo } from '../modeles/photo';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { AuthService } from '../services/auth.service';
-import * as firebase from 'firebase/app';
 import "firebase/auth";
 import "firebase/firestore";
 
@@ -15,28 +13,31 @@ import "firebase/firestore";
 export class AccueilComponent implements OnInit, OnDestroy {
   articles: Article[] = [];
   photos: Photo[] = [];
-  photoStart = 0;
-  photoEnd = 0;
-  articleStart = 0;
-  articleEnd = 0;
+  photoDebut = 0;
+  photoFin = 0;
+  articleDebut = 0;
+  articleFin = 0;
   articleCourant = 0;
   photoCourante = 0;
-  pasPhotos = 4;
-  pasArticles = 4;
-  pageCourantePhoto = 1;
-  pageCouranteArticle = 1;
+  readonly pasPhotos = 4;
+  readonly pasArticles = 4;
+  pageCourantePhoto = 0;
+  pageCouranteArticle = 0;
   nbPagesPhotos = 0;
   nbPagesArticles = 0;
 
   
   constructor(public globalService: GlobalService) {
-                firebase.default.auth().onAuthStateChanged(u => {
-    })
+
   }
 
   // Initialisation de la page
   ngOnInit() {
-  }
+    this.photoFin = Math.round(this.globalService.allPhotos.length);
+    this.articleFin = Math.round(this.globalService.allArticles.length);
+    this.nbPagesArticles = Math.round(this.articleFin / this.pasArticles) + 1;
+    this.nbPagesPhotos = Math.round(this.photoFin / this.pasPhotos) + 1;
+}
 
   ngOnDestroy() {
 
@@ -44,22 +45,22 @@ export class AccueilComponent implements OnInit, OnDestroy {
 
   onDecrementePhoto() {
     this.photoCourante -= this.pasPhotos;
-    this.pageCourantePhoto = Math.round(this.photoCourante / this.pasPhotos) + 1;
+    this.pageCourantePhoto = Math.round(this.photoCourante / this.pasPhotos);
   }
 
   onIncrementePhoto() {
     this.photoCourante += this.pasArticles;
-    this.pageCourantePhoto = Math.round(this.photoCourante / this.pasPhotos) + 1;
+    this.pageCourantePhoto = Math.round(this.photoCourante / this.pasPhotos);
   }
 
   onDecrementeArticle() {
     this.articleCourant -= this.pasArticles;
-    this.pageCouranteArticle = Math.round(this.articleCourant / this.pasArticles) + 1;
+    this.pageCouranteArticle = Math.round(this.articleCourant / this.pasArticles);
   }
 
   onIncrementeArticle() {
     this.articleCourant += this.pasArticles;
-    this.pageCouranteArticle = Math.round(this.articleCourant / this.pasArticles) + 1;
+    this.pageCouranteArticle = Math.round(this.articleCourant / this.pasArticles);
   }
 
 }

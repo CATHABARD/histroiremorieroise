@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { User } from './modeles/user';
 import { AuthService } from './services/auth.service';
 import { GlobalService } from './services/global.service';
 
@@ -13,8 +12,6 @@ export class AppComponent {
   
   constructor(private globalService: GlobalService,
     private authService: AuthService) {
-    this.authService.signInVisiteur().then((user) => {
-        // console.log(user);
-    });
-  }
+      globalService.initData();
+    }
 }

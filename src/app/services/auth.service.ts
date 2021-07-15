@@ -1,10 +1,9 @@
 import { Injectable, NgZone } from '@angular/core';
-import auth from 'firebase/app';
 import { Router } from '@angular/router';
 import { User } from '../modeles/user';
 import { MatDialog } from '@angular/material/dialog';
-import { from, Observable, Subject } from 'rxjs';
-import { Droits, GlobalService } from './global.service';
+import { from, Subject } from 'rxjs';
+import { Droits, Status } from './global.service';
 import * as firebase from 'firebase/app';
 import "firebase/auth";
 import "firebase/firestore";
@@ -15,23 +14,26 @@ import { UsersServicesService } from './users-services.service';
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly visiteur = {email: 'claude.cathabard@gmail.com',
-                      password: 'HDM2021'}
+  private readonly visiteur = {email: 'histoiredemorieres@gmail.com',
+                      password: '@HDM2021'}
 
   userId: string = '';
   private currentFirebaseUser: firebase.default.auth.UserCredential | undefined;
   private currentUser: User | undefined | null;
+  private status: number | undefined;
+
+  authSubject = new Subject<User>();
 
   constructor(public dialog: MatDialog,
               public router: Router,
               public ngZone: NgZone,
               private afs: AngularFirestore,
               private usersService: UsersServicesService) {
-                firebase.default.auth().onAuthStateChanged(u => {
-                  if(u == null) {
-                    this.currentFirebaseUser = undefined;
-                  }
-            });
+                this.status = 0;
+  }
+
+  private emitUserChanged() {
+    this.authSubject.next(this.currentUser!);
   }
 
   getVisiteur() {
@@ -45,22 +47,27 @@ export class AuthService {
   getCurrentUser() {
     return this.currentUser;
   }      
+
+  getStatus() {
+    return this.status;
+  }
       
   signInVisiteur() {
     return new Promise((resolve, reject) => {
-      // Ferme la connexion en cours
-      this.SignOut().then(() => {
+        firebase.default.auth().signOut().then(() => {
         // Ouvrir la connexion visiteur
         firebase.default.auth().signInWithEmailAndPassword(this.visiteur.email, this.visiteur.password).then(u => {
-          this.currentUser = null;
+          this.status = 0;
+          this.currentUser = new User('', u.user?.uid, 'Visiteur', 'Visiteur', u.user?.email?.trim(), true, Status.valide );
           this.currentFirebaseUser = u;
         }).catch(error => {
           console.log(error);
           reject(error);
         }).finally(() => {
-          resolve(this.currentUser);
+          this.emitUserChanged();
+          resolve(this.currentFirebaseUser);
         })
-      });
+      })
     })
   }
 
@@ -93,13 +100,12 @@ export class AuthService {
   signInUser(email: string, password: string) {
     let USER: User;
     let U: User;
+    let X: User;
 
     return new Promise((resolve, reject) => {
-      // Ferme la connexion en cours
-      this.SignOut().finally(() => {
-      // ouverture de la nouvelle connexion
-      firebase.default.auth().signInWithEmailAndPassword(email, password).then(user => {
-          this.currentFirebaseUser = user;
+      firebase.default.auth().signOut().then(() => {
+        // ouverture de la nouvelle connexion
+        firebase.default.auth().signInWithEmailAndPassword(email, password).then(user => {
           // console.log(user.user);
           // Vérifier si le mail a bien été validé
           if (user.user!.emailVerified) {
@@ -108,20 +114,8 @@ export class AuthService {
             user.user!.displayName!.substring(user.user!.displayName!.indexOf('/') + 1),
             user.user!.email?.toString(),
             true, Droits.visiteur);
-
-              // Rechercher si user est dans la BD
-            this.usersService.getUserByUid(user.user?.uid!).subscribe(u => {
-              // console.log(u as User);
-              if(u.length <= 0) {
-                console.log(USER);
-                this.usersService.addUser(USER);
-              }
-            },
-            (error) => {
-              console.log(error.message);
-            });
-          } else { // mail non vérifié
             this.currentFirebaseUser = user;
+          } else { // mail non vérifié
             this.router.navigate(['app-unvalidate-user-message']);
           }
         }).catch(error => {
@@ -129,9 +123,30 @@ export class AuthService {
           alert('Erreur de connexion, mail ou mot de passe incorrect ?');
           reject(error);
         }).finally(() => {
-          resolve(this.currentFirebaseUser);
-        })
-      });
+          // Rechercher si user est dans la BD
+            this.usersService.getUserByUid(this.currentFirebaseUser?.user?.uid.trim() as string).subscribe(u => {
+              if (u.length <= 0) {
+                this.usersService.addUser(USER);
+              } else {
+                u.forEach(U => {
+                  X = U.payload.doc.data() as User;
+                  if (u.length <= 0) {
+                    this.usersService.addUser(USER);
+                  } else {
+                    this.currentUser = U.payload.doc.data() as User;
+                    this.currentUser.id = U.payload.doc.id;
+                    this.status = this.currentUser.status;
+                    this.emitUserChanged();
+                    resolve(this.currentFirebaseUser);
+                  }
+                })
+              }
+            },
+            (error) => {
+              console.log(error.message);
+            });
+        });
+      })
     });
   }
 
